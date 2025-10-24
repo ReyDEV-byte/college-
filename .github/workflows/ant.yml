@@ -1,0 +1,223 @@
+import java.util.Scanner;
+
+public class Dijkstra {
+    public static void main(String[] args) {
+        Scanner lector = new Scanner(System.in);
+        final int INFINITO = 1_000_000_000;
+
+        System.out.println("Escribe las aristas como A-B, separadas por comas (ej: A-B, B-C, C-A). Deja vacío para usar el grafo por defecto del profesor:");
+        String lineaAristas = lector.nextLine().trim();
+        String[] listaAristas = lineaAristas.isEmpty() ? new String[0] : lineaAristas.split(",");
+
+        // si el usuario ingresó aristas, procesarlas; si no, usaremos el grafo por defecto
+        String[] nodos;
+        int totalNodos;
+        int[][] matriz;
+
+        if (listaAristas.length == 0) {
+            // Grafo del profesor (por defecto)
+            nodos = new String[] {"A","B","C","D","E","F","O"};
+            totalNodos = nodos.length;
+            matriz = new int[totalNodos][totalNodos];
+            // inicializar
+            for (int i = 0; i < totalNodos; i++) {
+                for (int j = 0; j < totalNodos; j++) {
+                    matriz[i][j] = (i == j) ? 0 : INFINITO;
+                }
+            }
+            // asignar aristas tal como el profe
+            matriz[6][0]=2;  matriz[0][6]=2;
+            matriz[6][1]=5;  matriz[1][6]=5;
+            matriz[6][3]=6;  matriz[3][6]=6;
+            matriz[0][2]=7;  matriz[2][0]=7;
+            matriz[2][3]=22; matriz[3][2]=22;
+            matriz[2][4]=15; matriz[4][2]=15;
+            matriz[4][3]=8;  matriz[3][4]=8;
+            matriz[4][5]=25; matriz[5][4]=25;
+            matriz[5][3]=0;  matriz[3][5]=0;   // ojo: peso 0 está permitido aquí
+            matriz[5][1]=1;  matriz[1][5]=1;
+            matriz[1][3]=12; matriz[3][1]=12;
+        } else {
+            // Procesar entrada del usuario (aristas y luego pesos)
+            String[] desde = new String[listaAristas.length];
+            String[] hasta = new String[listaAristas.length];
+            int i = 0;
+            while (i < listaAristas.length) {
+                String arista = listaAristas[i].trim();
+                int guion = arista.indexOf('-');
+                if (guion != -1) {
+                    desde[i] = arista.substring(0, guion).trim().toUpperCase();
+                    hasta[i] = arista.substring(guion + 1).trim().toUpperCase();
+                } else {
+                    desde[i] = "";
+                    hasta[i] = "";
+                }
+                i = i + 1;
+            }
+
+            System.out.println("Ahora escribe los pesos en el mismo orden, separados por coma (ej: 2,3,4):");
+            String lineaPesos = lector.nextLine().trim();
+            String[] listaPesos = lineaPesos.isEmpty() ? new String[0] : lineaPesos.split(",");
+            int[] peso = new int[listaAristas.length];
+            i = 0;
+            while (i < listaPesos.length && i < peso.length) {
+                try {
+                    peso[i] = Integer.parseInt(listaPesos[i].trim());
+                } catch (Exception e) {
+                    peso[i] = 0;
+                }
+                i = i + 1;
+            }
+
+            // construir lista única de nodos desde las aristas del usuario
+            nodos = new String[listaAristas.length * 2];
+            totalNodos = 0;
+            i = 0;
+            while (i < desde.length) {
+                int j = 0;
+                boolean encontrado = false;
+                while (j < totalNodos) {
+                    if (nodos[j].equals(desde[i])) encontrado = true;
+                    j = j + 1;
+                }
+                if (!encontrado && !desde[i].equals("")) {
+                    nodos[totalNodos] = desde[i];
+                    totalNodos = totalNodos + 1;
+                }
+                j = 0;
+                encontrado = false;
+                while (j < totalNodos) {
+                    if (nodos[j].equals(hasta[i])) encontrado = true;
+                    j = j + 1;
+                }
+                if (!encontrado && !hasta[i].equals("")) {
+                    nodos[totalNodos] = hasta[i];
+                    totalNodos = totalNodos + 1;
+                }
+                i = i + 1;
+            }
+
+            // inicializar matriz con INFINITO
+            matriz = new int[totalNodos][totalNodos];
+            i = 0;
+            while (i < totalNodos) {
+                int j = 0;
+                while (j < totalNodos) {
+                    matriz[i][j] = (i == j) ? 0 : INFINITO;
+                    j = j + 1;
+                }
+                i = i + 1;
+            }
+
+            // llenar la matriz con pesos (aristas dirigidas posDesde -> posHasta)
+            i = 0;
+            while (i < desde.length) {
+                if (!desde[i].equals("") && !hasta[i].equals("")) {
+                    int posDesde = -1;
+                    int posHasta = -1;
+                    int j = 0;
+                    while (j < totalNodos) {
+                        if (nodos[j].equals(desde[i])) posDesde = j;
+                        if (nodos[j].equals(hasta[i])) posHasta = j;
+                        j = j + 1;
+                    }
+                    if (posDesde != -1 && posHasta != -1) matriz[posDesde][posHasta] = peso[i];
+                }
+                i = i + 1;
+            }
+        }
+
+        // Ahora pedimos las rutas a optimizar (si no entraron antes)
+        System.out.println("Ahora escribe las rutas a optimizar (ej: A-B, A-C):");
+        String lineaRutas = lector.nextLine().trim();
+        String[] listaRutas = lineaRutas.isEmpty() ? new String[0] : lineaRutas.split(",");
+        String[] inicioRuta = new String[listaRutas.length];
+        String[] finRuta = new String[listaRutas.length];
+        int i = 0;
+        while (i < listaRutas.length) {
+            String ruta = listaRutas[i].trim();
+            int guion = ruta.indexOf('-');
+            if (guion != -1) {
+                inicioRuta[i] = ruta.substring(0, guion).trim().toUpperCase();
+                finRuta[i] = ruta.substring(guion + 1).trim().toUpperCase();
+            } else {
+                inicioRuta[i] = "";
+                finRuta[i] = "";
+            }
+            i = i + 1;
+        }
+
+        // Ejecutar Dijkstra para cada ruta pedida
+        i = 0;
+        while (i < listaRutas.length) {
+            String inicio = inicioRuta[i];
+            String fin = finRuta[i];
+            int posInicio = -1;
+            int posFin = -1;
+            int j = 0;
+            while (j < totalNodos) {
+                if (nodos[j].equals(inicio)) posInicio = j;
+                if (nodos[j].equals(fin)) posFin = j;
+                j = j + 1;
+            }
+            if (posInicio == -1 || posFin == -1) {
+                System.out.println("Solución: No hay camino válido (nodo no encontrado: " + inicio + "->" + fin + ")");
+                i = i + 1;
+                continue;
+            }
+            int[] distancia = new int[totalNodos];
+            int[] previo = new int[totalNodos];
+            boolean[] visitado = new boolean[totalNodos];
+            j = 0;
+            while (j < totalNodos) {
+                distancia[j] = INFINITO;
+                previo[j] = -1;
+                visitado[j] = false;
+                j = j + 1;
+            }
+            distancia[posInicio] = 0;
+            int contador = 0;
+            while (contador < totalNodos) {
+                int actual = -1;
+                int minimo = INFINITO + 1;
+                int k = 0;
+                while (k < totalNodos) {
+                    if (!visitado[k] && distancia[k] < minimo) {
+                        minimo = distancia[k];
+                        actual = k;
+                    }
+                    k = k + 1;
+                }
+                if (actual == -1) break;
+                visitado[actual] = true;
+                int vecino = 0;
+                while (vecino < totalNodos) {
+                    if (!visitado[vecino] && matriz[actual][vecino] != INFINITO) {
+                        int alt = distancia[actual] + matriz[actual][vecino];
+                        if (alt < distancia[vecino]) {
+                            distancia[vecino] = alt;
+                            previo[vecino] = actual;
+                        }
+                    }
+                    vecino = vecino + 1;
+                }
+                contador = contador + 1;
+            }
+            // reconstruir camino
+            if (distancia[posFin] >= INFINITO) {
+                System.out.println("Solución: No hay camino");
+            } else {
+                int nodo = posFin;
+                String camino = "";
+                while (nodo != -1) {
+                    if (camino.equals("")) camino = nodos[nodo];
+                    else camino = nodos[nodo] + "→" + camino;
+                    nodo = previo[nodo];
+                }
+                System.out.println("Solución: " + camino + ", " + distancia[posFin]);
+            }
+            i = i + 1;
+        }
+        lector.close();
+    }
+}
