@@ -1,0 +1,236 @@
+ublic class BuscarlaPalabra85WIN1RRtrading {
+    public static void main(String[] args) {
+        int filas = 5;
+        int columnas = 5;
+        char[][] matriz = {
+            {'S', 'A', 'T', 'O', 'R'},
+            {'A', 'R', 'E', 'P', 'O'},
+            {'T', 'E', 'N', 'E', 'T'},
+            {'O', 'P', 'E', 'R', 'A'},
+            {'R', 'O', 'T', 'A', 'S'}
+        };
+        String palabra = "SATOR";
+        int longitud_palabra = 5;       
+        System.out.println("Buscando la palabra: " + palabra);      
+        int i = 0;
+        while (i < filas) {
+            String fila_completa = "";
+            int j = 0;
+            while (j < columnas) {
+                fila_completa = fila_completa + matriz[i][j];
+                j = j + 1;
+            }
+            int pos = 0;
+            while (pos <= columnas - longitud_palabra) {
+                boolean coincide = true;
+                int k = 0;
+                while (k < longitud_palabra) {
+                    if (fila_completa.charAt(pos + k) != palabra.charAt(k)) {
+                        coincide = false;
+                    }
+                    k = k + 1;
+                }
+                if (coincide == true) {
+                    System.out.println("La palabra se encuentra de IZQUIERDA a DERECHA en la fila " + i);
+                }
+                pos = pos + 1;
+            }
+            i = i + 1;
+        }
+        i = 0;
+        while (i < filas) {
+            String fila_invertida = "";
+            int j = columnas - 1;
+            while (j >= 0) {
+                fila_invertida = fila_invertida + matriz[i][j];
+                j = j - 1;
+            }
+            int pos = 0;
+            while (pos <= columnas - longitud_palabra) {
+                boolean coincide = true;
+                int k = 0;
+                while (k < longitud_palabra) {
+                    if (fila_invertida.charAt(pos + k) != palabra.charAt(k)) {
+                        coincide = false;
+                    }
+                    k = k + 1;
+                }
+                if (coincide == true) {
+                    System.out.println("La palabra se encuentra de DERECHA a IZQUIERDA en la fila " + i);
+                }
+                pos = pos + 1;
+            }
+            i = i + 1;
+        }
+        int j = 0;
+        while (j < columnas) {
+            String columna_completa = "";
+            i = 0;
+            while (i < filas) {
+                columna_completa = columna_completa + matriz[i][j];
+                i = i + 1;
+            }
+            int pos = 0;
+            while (pos <= filas - longitud_palabra) {
+                boolean coincide = true;
+                int k = 0;
+                while (k < longitud_palabra) {
+                    if (columna_completa.charAt(pos + k) != palabra.charAt(k)) {
+                        coincide = false;
+                    }
+                    k = k + 1;
+                }
+                if (coincide == true) {
+                    System.out.println("La palabra se encuentra de ARRIBA a ABAJO en la columna " + j);
+                }
+                pos = pos + 1;
+            }
+            j = j + 1;
+        }
+        j = 0;
+        while (j < columnas) {
+            String columna_invertida = "";
+            i = filas - 1;
+            while (i >= 0) {
+                columna_invertida = columna_invertida + matriz[i][j];
+                i = i - 1;
+            }
+            int pos = 0;
+            while (pos <= filas - longitud_palabra) {
+                boolean coincide = true;
+                int k = 0;
+                while (k < longitud_palabra) {
+                    if (columna_invertida.charAt(pos + k) != palabra.charAt(k)) {
+                        coincide = false;
+                    }
+                    k = k + 1;
+                }
+                if (coincide == true) {
+                    System.out.println("La palabra se encuentra de ABAJO a ARRIBA en la columna " + j);
+                }
+                pos = pos + 1;
+            }
+            j = j + 1;
+        }
+        System.out.println("\nBuscando en diagonales principales \\");
+        i = 0;
+        while (i < filas) {
+            int fila_actual = i;
+            int col_actual = 0;
+            String diagonal = "";
+            while (fila_actual < filas && col_actual < columnas) {
+                diagonal = diagonal + matriz[fila_actual][col_actual];
+                fila_actual = fila_actual + 1;
+                col_actual = col_actual + 1;
+            }
+            if (diagonal.length() >= longitud_palabra) {
+                int pos = 0;
+                while (pos <= diagonal.length() - longitud_palabra) {
+                    boolean coincide = true;
+                    int k = 0;
+                    while (k < longitud_palabra) {
+                        if (diagonal.charAt(pos + k) != palabra.charAt(k)) {
+                            coincide = false;
+                        }
+                        k = k + 1;
+                    }
+                    if (coincide == true) {
+                        System.out.println("La palabra se encuentra en diagonal \\ desde fila " + (i + pos) + ", columna " + pos);
+                    }
+                    pos = pos + 1;
+                }
+            }
+            i = i + 1;
+        }
+        j = 1;
+        while (j < columnas) {
+            int fila_actual = 0;
+            int col_actual = j;
+            String diagonal = "";
+            while (fila_actual < filas && col_actual < columnas) {
+                diagonal = diagonal + matriz[fila_actual][col_actual];
+                fila_actual = fila_actual + 1;
+                col_actual = col_actual + 1;
+            }
+            if (diagonal.length() >= longitud_palabra) {
+                int pos = 0;
+                while (pos <= diagonal.length() - longitud_palabra) {
+                    boolean coincide = true;
+                    int k = 0;
+                    while (k < longitud_palabra) {
+                        if (diagonal.charAt(pos + k) != palabra.charAt(k)) {
+                            coincide = false;
+                        }
+                        k = k + 1;
+                    }
+                    if (coincide == true) {
+                        System.out.println("La palabra se encuentra en diagonal \\ desde fila " + pos + ", columna " + (j + pos));
+                    }
+                    pos = pos + 1;
+                }
+            }
+            j = j + 1;
+        }
+        System.out.println("\nBuscando en diagonales secundarias /");
+        i = 0;
+        while (i < filas) {
+            int fila_actual = i;
+            int col_actual = columnas - 1;
+            String diagonal = "";
+            while (fila_actual < filas && col_actual >= 0) {
+                diagonal = diagonal + matriz[fila_actual][col_actual];
+                fila_actual = fila_actual + 1;
+                col_actual = col_actual - 1;
+            }
+            if (diagonal.length() >= longitud_palabra) {
+                int pos = 0;
+                while (pos <= diagonal.length() - longitud_palabra) {
+                    boolean coincide = true;
+                    int k = 0;
+                    while (k < longitud_palabra) {
+                        if (diagonal.charAt(pos + k) != palabra.charAt(k)) {
+                            coincide = false;
+                        }
+                        k = k + 1;
+                    }
+                    if (coincide == true) {
+                        System.out.println("La palabra se encuentra en diagonal / desde fila " + (i + pos) + ", columna " + (columnas - 1 - pos));
+                    }
+                    pos = pos + 1;
+                }
+            }
+            i = i + 1;
+        }
+        j = columnas - 2;
+        while (j >= 0) {
+            int fila_actual = 0;
+            int col_actual = j;
+            String diagonal = "";
+            while (fila_actual < filas && col_actual >= 0) {
+                diagonal = diagonal + matriz[fila_actual][col_actual];
+                fila_actual = fila_actual + 1;
+                col_actual = col_actual - 1;
+            }
+            if (diagonal.length() >= longitud_palabra) {
+                int pos = 0;
+                while (pos <= diagonal.length() - longitud_palabra) {
+                    boolean coincide = true;
+                    int k = 0;
+                    while (k < longitud_palabra) {
+                        if (diagonal.charAt(pos + k) != palabra.charAt(k)) {
+                            coincide = false;
+                        }
+                        k = k + 1;
+                    }
+                    if (coincide == true) {
+                        System.out.println("La palabra se encuentra en diagonal / desde fila " + pos + ", columna " + (j - pos));
+                    }
+                    pos = pos + 1;
+                }
+            }
+            j = j - 1;
+        }
+        
+        System.out.println("\nBusqueda completada!");
+    }
+}
