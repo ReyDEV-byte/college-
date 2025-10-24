@@ -1,0 +1,227 @@
+import java.util.Scanner;
+public class Dijkstra {
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+        int INFINITO = 1000000000;
+
+        System.out.println("Escribe las aristas como A-B, separadas por comas (ej: A-B, B-C). Deja vacío para usar el grafo por defecto:");
+        String linea = s.nextLine().trim();
+
+        String[] nodos;
+        int totalNodos;
+        int[][] matriz;
+
+        if (linea.equals("")) {
+            nodos = new String[] {"A","B","C","D","E","F","O"};
+            totalNodos = 7;
+            matriz = new int[totalNodos][totalNodos];
+            int a = 0;
+            while (a < totalNodos) {
+                int b = 0;
+                while (b < totalNodos) {
+                    if (a == b) matriz[a][b] = 0;
+                    else matriz[a][b] = INFINITO;
+                    b = b + 1;
+                }
+                a = a + 1;
+            }
+            matriz[6][0] = 2;  matriz[0][6] = 2;
+            matriz[6][1] = 5;  matriz[1][6] = 5;
+            matriz[6][3] = 6;  matriz[3][6] = 6;
+            matriz[0][2] = 7;  matriz[2][0] = 7;
+            matriz[2][3] = 22; matriz[3][2] = 22;
+            matriz[2][4] = 15; matriz[4][2] = 15;
+            matriz[4][3] = 8;  matriz[3][4] = 8;
+            matriz[4][5] = 25; matriz[5][4] = 25;
+            matriz[5][3] = 0;  matriz[3][5] = 0;
+            matriz[5][1] = 1;  matriz[1][5] = 1;
+            matriz[1][3] = 12; matriz[3][1] = 12;
+        } else {
+            String[] lista = linea.split(",");
+            int cnt = lista.length;
+            String[] desde = new String[cnt];
+            String[] hasta = new String[cnt];
+            int i = 0;
+            while (i < cnt) {
+                String ar = lista[i].trim();
+                int guion = ar.indexOf('-');
+                if (guion != -1) {
+                    desde[i] = ar.substring(0, guion).trim().toUpperCase();
+                    hasta[i] = ar.substring(guion + 1).trim().toUpperCase();
+                } else {
+                    desde[i] = "";
+                    hasta[i] = "";
+                }
+                i = i + 1;
+            }
+
+            System.out.println("Ahora escribe los pesos en el mismo orden, separados por coma (ej: 2,3,4):");
+            String lp = s.nextLine().trim();
+            String[] lpv = lp.split(",");
+            int[] peso = new int[cnt];
+            i = 0;
+            while (i < lpv.length && i < peso.length) {
+                peso[i] = Integer.parseInt(lpv[i].trim());
+                i = i + 1;
+            }
+
+            nodos = new String[cnt * 2];
+            totalNodos = 0;
+            i = 0;
+            while (i < cnt) {
+                int j = 0;
+                boolean enc = false;
+                while (j < totalNodos) {
+                    if (nodos[j] != null && nodos[j].equals(desde[i])) enc = true;
+                    j = j + 1;
+                }
+                if (!enc && desde[i] != null && !desde[i].equals("")) {
+                    nodos[totalNodos] = desde[i];
+                    totalNodos = totalNodos + 1;
+                }
+                j = 0;
+                enc = false;
+                while (j < totalNodos) {
+                    if (nodos[j] != null && nodos[j].equals(hasta[i])) enc = true;
+                    j = j + 1;
+                }
+                if (!enc && hasta[i] != null && !hasta[i].equals("")) {
+                    nodos[totalNodos] = hasta[i];
+                    totalNodos = totalNodos + 1;
+                }
+                i = i + 1;
+            }
+
+            matriz = new int[totalNodos][totalNodos];
+            i = 0;
+            while (i < totalNodos) {
+                int j = 0;
+                while (j < totalNodos) {
+                    if (i == j) matriz[i][j] = 0;
+                    else matriz[i][j] = INFINITO;
+                    j = j + 1;
+                }
+                i = i + 1;
+            }
+
+            i = 0;
+            while (i < cnt) {
+                if (desde[i] != null && !desde[i].equals("") && hasta[i] != null && !hasta[i].equals("")) {
+                    int posD = -1;
+                    int posH = -1;
+                    int j = 0;
+                    while (j < totalNodos) {
+                        if (nodos[j] != null && nodos[j].equals(desde[i])) posD = j;
+                        if (nodos[j] != null && nodos[j].equals(hasta[i])) posH = j;
+                        j = j + 1;
+                    }
+                    if (posD != -1 && posH != -1) matriz[posD][posH] = peso[i];
+                }
+                i = i + 1;
+            }
+        }
+
+        System.out.println("Ahora escribe las rutas a optimizar (ej: A-B, A-C):");
+        String lr = s.nextLine().trim();
+        if (lr.equals("")) {
+            System.out.println("No se pidieron rutas. Fin.");
+            s.close();
+            return;
+        }
+        String[] rutas = lr.split(",");
+        int r = 0;
+        while (r < rutas.length) {
+            String rut = rutas[r].trim();
+            int gu = rut.indexOf('-');
+            String ini = "";
+            String fin = "";
+            if (gu != -1) {
+                ini = rut.substring(0, gu).trim().toUpperCase();
+                fin = rut.substring(gu + 1).trim().toUpperCase();
+            }
+
+            int posIni = -1;
+            int posFin = -1;
+            int z = 0;
+            while (z < (nodos.length)) {
+                if (z < 0) break;
+                if (z < nodos.length && nodos[z] != null) {
+                    if (nodos[z].equals(ini)) posIni = z;
+                    if (nodos[z].equals(fin)) posFin = z;
+                }
+                z = z + 1;
+            }
+
+            if (posIni == -1 || posFin == -1) {
+                System.out.println("Solución: No hay camino válido (" + ini + "->" + fin + ")");
+                r = r + 1;
+                continue;
+            }
+
+            int[] dist = new int[totalNodos];
+            int[] prev = new int[totalNodos];
+            boolean[] visto = new boolean[totalNodos];
+            int p = 0;
+            while (p < totalNodos) {
+                dist[p] = INFINITO;
+                prev[p] = -1;
+                visto[p] = false;
+                p = p + 1;
+            }
+            dist[posIni] = 0;
+
+            int cont = 0;
+            while (cont < totalNodos) {
+                int actual = -1;
+                int minimo = INFINITO + 1;
+                int k = 0;
+                while (k < totalNodos) {
+                    if (!visto[k] && dist[k] < minimo) {
+                        minimo = dist[k];
+                        actual = k;
+                    }
+                    k = k + 1;
+                }
+                if (actual == -1) break;
+                visto[actual] = true;
+                int vec = 0;
+                while (vec < totalNodos) {
+                    if (!visto[vec] && matriz[actual][vec] != INFINITO) {
+                        int alt = dist[actual] + matriz[actual][vec];
+                        if (alt < dist[vec]) {
+                            dist[vec] = alt;
+                            prev[vec] = actual;
+                        }
+                    }
+                    vec = vec + 1;
+                }
+                cont = cont + 1;
+            }
+
+            if (dist[posFin] >= INFINITO) {
+                System.out.println("Solución: No hay camino");
+            } else {
+                int nodo = posFin;
+                int[] camino = new int[totalNodos];
+                int len = 0;
+                while (nodo != -1) {
+                    camino[len++] = nodo;
+                    nodo = prev[nodo];
+                }
+                System.out.print("Solución: ");
+                int idx = len - 1;
+                while (idx >= 0) {
+                    System.out.print(nodos[camino[idx]]);
+                    if (idx > 0) System.out.print("→");
+                    else System.out.print(", ");
+                    idx = idx - 1;
+                }
+                System.out.println(dist[posFin]);
+            }
+
+            r = r + 1;
+        }
+
+        s.close();
+    }
+}
